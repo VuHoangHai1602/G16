@@ -1,4 +1,3 @@
-/* Toàn bộ Logic JS Giữ Nguyên Y Hệt Bản Gốc */
 var PROVINCES = [
   { name:'Hà Nội',          alias:['ha noi','hn','thu do'],          lat:21.0245, lon:105.8412, region:'Miền Bắc',    type:'Thành phố TW' },
   { name:'Hải Phòng',       alias:['hai phong','hp'],                lat:20.8449, lon:106.6881, region:'Miền Bắc',    type:'Thành phố TW' },
