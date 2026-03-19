@@ -2,117 +2,75 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<title>Thời tiết</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThoiTiet — Sinh động & Trẻ trung ✨</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h2>🌤️ Thời tiết</h2>
+<header>
+  <a class="logo" href="#">
+    <div class="logo-icon">🌈</div>
+    <div class="logo-text">THOI<span>TIET</span></div>
+  </a>
+  <div class="header-date" id="header-date"></div>
+</header>
 
-<input id="search-input" placeholder="Nhập tỉnh thành..." />
-<button onclick="doSearch()">Tìm</button>
+<div class="search-section">
+  <div class="search-wrap">
+    <span class="search-icon">✨</span>
+    <input id="search-input" type="text" placeholder="Gõ tên tỉnh thành phố (vd: Da Nang)..." autocomplete="off" spellcheck="false">
+    <button class="search-btn" onclick="doSearch()">Tìm Ngay</button>
+  </div>
+  <div id="search-dropdown"></div>
+  <div class="search-hint">💡 Gõ không dấu • Click bản đồ để chọn nhanh nhé!</div>
+</div>
 
-<h3 id="city">TP.HCM</h3>
-<p>Nhiệt độ: <span id="temp">--</span> °C</p>
-<p>Mô tả: <span id="desc">--</span></p>
-<p>Độ ẩm: <span id="humidity">--</span>%</p>
+<div class="main-grid">
+  <div class="card weather-card">
+    <div class="wc-location">📍 <span id="wc-location-label">Hồ Chí Minh, Việt Nam</span></div>
+    <div class="wc-city" id="wc-city">Thành phố Hồ Chí Minh</div>
+    <div class="wc-main">
+      <div class="wc-emoji" id="wc-emoji">⛅</div>
+      <div class="wc-temp-wrap">
+        <div class="wc-temp"><span id="temp-display">--</span><sup>°C</sup></div>
+        <div class="wc-desc" id="weather-desc">Đang phép thuật...</div>
+      </div>
+    </div>
+    <hr class="wc-divider">
+    <div class="wc-stats">
+      <div class="wc-stat"><div class="wc-stat-icon">💧</div><div><div class="wc-stat-label">Độ ẩm</div><div class="wc-stat-value"><span id="humidity">--</span>%</div></div></div>
+      <div class="wc-stat"><div class="wc-stat-icon">🍃</div><div><div class="wc-stat-label">Sức gió</div><div class="wc-stat-value"><span id="wind-speed">--</span> m/s</div></div></div>
+      <div class="wc-stat"><div class="wc-stat-icon">🌡</div><div><div class="wc-stat-label">Cảm giác</div><div class="wc-stat-value"><span id="feels-like">--</span>°C</div></div></div>
+      <div class="wc-stat"><div class="wc-stat-icon">🎈</div><div><div class="wc-stat-label">Áp suất</div><div class="wc-stat-value"><span id="pressure">--</span> hPa</div></div></div>
+    </div>
+    <div class="wc-updated">Phép thuật cập nhật lúc: <span id="updated-at">--</span></div>
+  </div>
 
-<h3>Dự báo</h3>
-<div id="forecast"></div>
+  <div class="card forecast-card">
+    <div class="card-title">Hành trình 5 ngày tới</div>
+    <div class="forecast-list" id="forecast-list">
+      <div class="skeleton" style="height:64px"></div>
+      <div class="skeleton" style="height:64px"></div>
+      <div class="skeleton" style="height:64px"></div>
+      <div class="skeleton" style="height:64px"></div>
+      <div class="skeleton" style="height:64px"></div>
+    </div>
+  </div>
 
-<div id="map" style="height:400px;"></div>
+  <div class="card map-card">
+    <div class="map-header">🗺️ Trạm Radar Mini</div>
+    <div class="map-badge">VietNam</div>
+    <div id="map"></div>
+  </div>
+</div>
+
+<footer>ThoiTiet • Dữ liệu: OpenWeatherMap</footer>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-var API_KEY = "16a6926b0138cecb7c6788782d764c26";
-
-var map = L.map('map').setView([10.8231,106.6297], 6);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-
-var marker = L.marker([10.8231,106.6297]).addTo(map);
-
-// ===== WEATHER =====
-function fetchWeather(lat, lon){
-  fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=vi`)
-  .then(r=>r.json())
-  .then(d=>{
-    if(d.cod !== 200){
-      alert("Lỗi: " + d.message);
-      return;
-    }
-
-    document.getElementById('temp').textContent = Math.round(d.main.temp);
-    document.getElementById('desc').textContent = d.weather[0].description;
-    document.getElementById('humidity').textContent = d.main.humidity;
-  })
-  .catch(()=>alert("Lỗi kết nối"));
-}
-
-// ===== FORECAST =====
-function fetchForecast(lat, lon){
-  fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric&lang=vi`)
-  .then(r=>r.json())
-  .then(data=>{
-    if(data.cod !== "200"){
-      alert("Lỗi forecast");
-      return;
-    }
-
-    let html="";
-    data.list.slice(0,5).forEach(item=>{
-      html += `<p>${item.dt_txt}: ${Math.round(item.main.temp)}°C</p>`;
-    });
-
-    document.getElementById('forecast').innerHTML = html;
-  })
-  .catch(()=>alert("Lỗi forecast"));
-}
-
-// ===== MOVE MAP =====
-function goTo(lat, lon, name){
-  map.setView([lat,lon], 10);
-  marker.setLatLng([lat,lon]);
-
-  document.getElementById('city').textContent = name;
-
-  fetchWeather(lat,lon);
-  fetchForecast(lat,lon);
-}
-
-// ===== SEARCH =====
-function doSearch(){
-  let q = document.getElementById('search-input').value;
-
-  if(!q){
-    alert("Nhập địa điểm!");
-    return;
-  }
-
-  fetch(`https://api.openweathermap.org/geo/1.0/direct?q=${q},Vietnam&limit=1&appid=${API_KEY}`)
-  .then(r=>r.json())
-  .then(data=>{
-    if(data.length === 0){
-      alert("Không tìm thấy!");
-      return;
-    }
-
-    let p = data[0];
-    goTo(p.lat, p.lon, p.name);
-  })
-  .catch(()=>alert("Lỗi tìm kiếm"));
-}
-
-// ===== CLICK MAP =====
-map.on('click', function(e){
-  goTo(e.latlng.lat, e.latlng.lng, "Vị trí đã chọn");
-});
-
-// ===== LOAD MẶC ĐỊNH =====
-goTo(10.8231,106.6297,"TP.HCM");
-
-</script>
-
+<script src="script.js"></script>
 </body>
 </html>
